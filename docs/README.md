@@ -32,14 +32,11 @@ A aplicação usa um banco local SQLite em `backend/instance/test.db`. Se precis
 
 ### Principais recursos
 
-- **Arquitetura organizada**: Separação clara entre backend (Flask) e frontend (templates/static)
-- **Autenticação e autorização**: Sistema completo com 2FA opcional
-- **Proteções de segurança**: CSRF, rate limiting e validações de senha
-- **Camada de serviços**: Regras de negócio desacopladas das rotas
-- **Templates modulares**: Interface organizada em `frontend/templates/`
-- **Assets organizados**: CSS, JS e imagens em `frontend/static/`
-- **Docker e Docker Compose**: Execução padronizada e conteinerizada
-- **Documentação completa**: Guias detalhados em `docs/`
+- Autenticação e autorização (com 2FA opcional)
+- Proteções de segurança: CSRF, rate limiting e validações de senha
+- Camada de serviços com regras de negócio desacopladas das rotas
+- Templates modulares e assets organizados
+- Docker e Docker Compose para execução padronizada
 
 ### Linguagens e tecnologias utilizadas
 
@@ -71,8 +68,6 @@ academic_project/
 │   │   ├── css/               # Estilos CSS
 │   │   ├── js/                # Scripts JavaScript
 │   │   └── img/               # Imagens e assets
-│   ├── package.json           # Dependências Node.js (se necessário)
-│   └── package-lock.json      # Lock file do npm
 ├── docs/                      # Documentação do projeto
 │   ├── README.md              # Este arquivo
 │   ├── SETUP_SECURITY.md      # Configurações de segurança
@@ -172,36 +167,6 @@ Notas:
 - As variáveis de ambiente podem ser definidas no `docker-compose.yaml` ou via arquivo `.env` (se configurado).
 - Volumes/`backend/instance/` garantem persistência local do banco SQLite.
 - O Docker Compose está configurado para usar a estrutura backend/frontend separada.
-
----
-
-## Nova Organização do Projeto
-
-Este projeto foi reorganizado para melhor separação de responsabilidades:
-
-### 📁 **Estrutura Backend/Frontend**
-
-- **`backend/`**: Contém todo o código Python/Flask
-  - Lógica de negócio, rotas, serviços e modelos
-  - Configurações Docker e dependências
-  - Banco de dados e scripts auxiliares
-
-- **`frontend/`**: Contém toda a interface do usuário
-  - Templates Jinja2 organizados
-  - Arquivos estáticos (CSS, JS, imagens)
-  - Dependências Node.js (se necessário)
-
-- **`docs/`**: Documentação centralizada
-  - README, guias de segurança, relatórios
-  - Instruções de execução e configuração
-
-### 🔧 **Benefícios da Nova Organização**
-
-1. **Separação clara**: Backend e frontend bem definidos
-2. **Manutenção facilitada**: Código organizado por responsabilidade
-3. **Escalabilidade**: Estrutura preparada para crescimento
-4. **Colaboração**: Equipes podem trabalhar em áreas específicas
-5. **Deploy independente**: Possibilidade de deploy separado no futuro
 
 ---
 
