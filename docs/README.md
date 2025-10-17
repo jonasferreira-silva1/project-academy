@@ -11,6 +11,7 @@ Se você só quer rodar a aplicação sem se preocupar com detalhes técnicos, s
 Opção A — Sem Docker (Windows):
 
 ```bash
+cd academic_project/backend
 python -m venv env
 "env\\Scripts\\activate"
 pip install -r requirements.txt
@@ -22,20 +23,23 @@ python app.py
 Opção B — Com Docker:
 
 ```bash
-docker build -t educ .
+cd academic_project
 docker compose build
 docker compose up
 ```
 
-A aplicação usa um banco local SQLite em `instance/test.db`. Se precisar “resetar”, apague esse arquivo (somente em ambiente local).
+A aplicação usa um banco local SQLite em `backend/instance/test.db`. Se precisar "resetar", apague esse arquivo (somente em ambiente local).
 
 ### Principais recursos
 
-- Autenticação e autorização (com 2FA opcional)
-- Proteções de segurança: CSRF, rate limiting e validações de senha
-- Camada de serviços com regras de negócio desacopladas das rotas
-- Templates modulares e assets em `static/`
-- Docker e Docker Compose para execução padronizada
+- **Arquitetura organizada**: Separação clara entre backend (Flask) e frontend (templates/static)
+- **Autenticação e autorização**: Sistema completo com 2FA opcional
+- **Proteções de segurança**: CSRF, rate limiting e validações de senha
+- **Camada de serviços**: Regras de negócio desacopladas das rotas
+- **Templates modulares**: Interface organizada em `frontend/templates/`
+- **Assets organizados**: CSS, JS e imagens em `frontend/static/`
+- **Docker e Docker Compose**: Execução padronizada e conteinerizada
+- **Documentação completa**: Guias detalhados em `docs/`
 
 ### Linguagens e tecnologias utilizadas
 
@@ -50,17 +54,32 @@ A aplicação usa um banco local SQLite em `instance/test.db`. Se precisar “re
 
 ```
 academic_project/
-  app.py                 # Ponto de entrada Flask
-  Dockerfile             # Build da imagem
-  docker-compose.yaml    # Orquestração local
-  requirements.txt       # Dependências Python
-  routes/                # Blueprints e rotas HTTP
-  services/              # Regras de negócio e integrações
-  models/                # Modelos e camadas de persistência
-  domain/                # Constantes e modelos de domínio
-  templates/             # Páginas Jinja2
-  static/                # CSS, JS e imagens
-  instance/test.db       # Banco local (SQLite)
+├── backend/                    # Código backend (Flask)
+│   ├── app.py                 # Ponto de entrada Flask
+│   ├── Dockerfile             # Build da imagem
+│   ├── requirements.txt       # Dependências Python
+│   ├── env_example.txt        # Exemplo de variáveis de ambiente
+│   ├── wait-for-db.sh         # Script para aguardar banco
+│   ├── routes/                # Blueprints e rotas HTTP
+│   ├── services/              # Regras de negócio e integrações
+│   ├── models/                # Modelos e camadas de persistência
+│   ├── domain/                # Constantes e modelos de domínio
+│   └── instance/              # Banco local (SQLite)
+├── frontend/                   # Código frontend
+│   ├── templates/             # Páginas Jinja2
+│   ├── static/                # CSS, JS e imagens
+│   │   ├── css/               # Estilos CSS
+│   │   ├── js/                # Scripts JavaScript
+│   │   └── img/               # Imagens e assets
+│   ├── package.json           # Dependências Node.js (se necessário)
+│   └── package-lock.json      # Lock file do npm
+├── docs/                      # Documentação do projeto
+│   ├── README.md              # Este arquivo
+│   ├── SETUP_SECURITY.md      # Configurações de segurança
+│   ├── RELATORIO_2FA.md       # Documentação 2FA
+│   └── ...                    # Outros documentos
+├── docker-compose.yaml        # Orquestração dos serviços
+└── .gitignore                 # Arquivos ignorados pelo Git
 ```
 
 Consulte também:
@@ -82,21 +101,27 @@ Consulte também:
 
 ## Configuração do ambiente (sem Docker)
 
-1. Crie e ative um ambiente virtual Python:
+1. Navegue para a pasta backend:
+
+```bash
+cd academic_project/backend
+```
+
+2. Crie e ative um ambiente virtual Python:
 
 ```bash
 python -m venv env
 "env\\Scripts\\activate"
 ```
 
-2. Instale as dependências:
+3. Instale as dependências:
 
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-3. Variáveis de ambiente:
+4. Variáveis de ambiente:
 
 - Use `env_example.txt` como referência para configurar as variáveis necessárias
 - Em Windows (cmd/powershell), defina temporariamente antes de rodar a aplicação, por exemplo:
@@ -106,22 +131,22 @@ set FLASK_APP=app.py
 set FLASK_ENV=development
 ```
 
-4. Executar a aplicação:
+5. Executar a aplicação:
 
 ```bash
 python app.py
 ```
 
-A aplicação utilizará o SQLite padrão em `instance/test.db`. Caso precise reinicializar, exclua o arquivo `test.db` (ele será recriado conforme a inicialização da app, se previsto pelo código).
+A aplicação utilizará o SQLite padrão em `backend/instance/test.db`. Caso precise reinicializar, exclua o arquivo `test.db` (ele será recriado conforme a inicialização da app, se previsto pelo código).
 
 ---
 
 ## Execução com Docker
 
-1. Construir a imagem (nome sugerido: `educ`):
+1. Navegue para a pasta do projeto:
 
 ```bash
-docker build -t educ .
+cd academic_project
 ```
 
 2. Construir os serviços do Compose:
@@ -145,7 +170,38 @@ docker compose down
 Notas:
 
 - As variáveis de ambiente podem ser definidas no `docker-compose.yaml` ou via arquivo `.env` (se configurado).
-- Volumes/`instance/` garantem persistência local do banco SQLite.
+- Volumes/`backend/instance/` garantem persistência local do banco SQLite.
+- O Docker Compose está configurado para usar a estrutura backend/frontend separada.
+
+---
+
+## Nova Organização do Projeto
+
+Este projeto foi reorganizado para melhor separação de responsabilidades:
+
+### 📁 **Estrutura Backend/Frontend**
+
+- **`backend/`**: Contém todo o código Python/Flask
+  - Lógica de negócio, rotas, serviços e modelos
+  - Configurações Docker e dependências
+  - Banco de dados e scripts auxiliares
+
+- **`frontend/`**: Contém toda a interface do usuário
+  - Templates Jinja2 organizados
+  - Arquivos estáticos (CSS, JS, imagens)
+  - Dependências Node.js (se necessário)
+
+- **`docs/`**: Documentação centralizada
+  - README, guias de segurança, relatórios
+  - Instruções de execução e configuração
+
+### 🔧 **Benefícios da Nova Organização**
+
+1. **Separação clara**: Backend e frontend bem definidos
+2. **Manutenção facilitada**: Código organizado por responsabilidade
+3. **Escalabilidade**: Estrutura preparada para crescimento
+4. **Colaboração**: Equipes podem trabalhar em áreas específicas
+5. **Deploy independente**: Possibilidade de deploy separado no futuro
 
 ---
 
