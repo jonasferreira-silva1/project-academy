@@ -1,0 +1,144 @@
+.card {
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease;
+    min-height: 100%;
+    flex: 1;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+}
+
+.progress {
+    height: 20px;
+    font-size: 0.75rem;
+}
+
+/* Estilo para o botão de voltar */
+.back-circle {
+    width: 40px;
+    height: 40px;
+    background-color: #1b3b4d;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    margin-left: 0.5rem;
+    z-index: 1;
+    transition: background-color 0.3s ease; /* Adicionado: suaviza hover */
+}
+
+.back-circle svg {
+    color: white;
+}
+
+.back-circle:hover {
+    background-color: #154256;
+}
+
+/* ==== Estilo do título para evitar sobreposição ==== */
+.page-title {
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+ h5,
+ p {
+    margin-bottom: 0px; /* ou 2px se quiser ainda mais junto */
+}
+
+canvas{
+    max-width: 100%; 
+    max-height: 250px;
+}
+
+/* Visto só aparece verde quando o checkbox está marcado */
+.form-check-label .checkmark {
+    visibility: hidden;
+    color: #198754;
+    font-weight: bold;
+    margin-right: 4px;
+    font-size: 1.2em;
+}
+.form-check-input:checked + .form-check-label .checkmark {
+    visibility: visible;
+}
+
+.dropdown-item .checkmark {
+    visibility: hidden;
+    color: #198754;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.skill-checkbox:checked + .checkmark {
+    visibility: visible;
+}
+
+.skills-dropdown, .chama{
+  height: 38px; 
+}
+
+.skills-dropdown .btn {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.75rem;
+}
+
+.skills-dropdown .dropdown-menu {
+  min-width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown .dropdown .btn {
+    width: 200px;
+}
+
+.dropdown .dropdown-menu .btn {
+    width: 150px;
+    min-width: 100px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* Responsividade */
+
+/* Telas médias (tablet) */
+@media (max-width: 768px) {
+    .back-circle {
+        width: 35px;
+        height: 35px;
+    }
+    .page-title {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+/* Telas pequenas (smartphones) */
+@media (max-width: 576px) {
+    .back-circle {
+        width: 30px;
+        height: 30px;
+    }
+
+    .page-title {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}

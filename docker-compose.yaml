@@ -1,0 +1,37 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/app.py:/app/app.py
+      - ./frontend/static:/app/static
+      - ./frontend/templates:/app/templates
+    restart: always
+    networks:
+      - dockercompose
+    depends_on:
+      - db
+    command: ["/wait-for-db.sh", "db", "python", "app.py"]
+    env_file:
+      - ./backend/env_example.txt
+
+  db:
+    image: mysql:5.7
+    env_file:
+      - ./backend/env_example.txt
+    environment:
+      MYSQL_ROOT_PASSWORD: "jonas1385"
+      MYSQL_DATABASE: "educ_invest"
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - dockercompose
+
+networks:
+  dockercompose:

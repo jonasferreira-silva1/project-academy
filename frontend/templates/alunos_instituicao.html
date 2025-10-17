@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% set hide_navbar = False %}
+
+{% block title %}Gerenciar Alunos - DashTalent{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/alunos_instituicao.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 position-relative">
+        <a href="{{ url_for('auth.home') }}" class="back-circle position-absolute start-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5a.5.5 0 0 1 .5.5z"/>
+            </svg>
+        </a>
+        <h1 class="m-0 w-100 text-center title-responsive">Gerenciar Alunos</h1>
+  </div>
+
+    <div class="text-center"><p>Veja e gerencie aqui os alunos vinculados à sua instituição.</p></div><br>
+
+    <form method="POST" class="row g-2 align-items-end mb-4">
+    <!-- CSRF: campo hidden para proteção contra Cross-Site Request Forgery -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="col-md-4">
+        <select name="curso" class="form-select form-select-sm">
+            <option value="">Todos os Cursos</option>
+            {% for curso in cursos %}
+                <option value="{{ curso }}" {% if curso == filtro_curso %}selected{% endif %}>{{ curso }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+    </div>
+    <div class="col-md-3">
+        <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#cadastroModal">Cadastrar Aluno</button>
+    </div>
+</form>
+
+    <!-- Lista de alunos -->
+    {% if alunos %}
+        <div class="row g-4">
+            {% for aluno in alunos %}
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ aluno.nome_jovem }}</h5>
+                        <p><strong>Curso:</strong> {{ aluno.curso }}</p>
+                        <p><strong>Periodo:</strong> {{ aluno.periodo }}</p>
+                        <p><strong>Data de Nascimento:</strong> {{ aluno.data_nascimento }}</p><br>
+
+                        {% if aluno.hard_labels or aluno.soft_labels %}
+                            <canvas id="grafico{{ loop.index }}"></canvas>
+                            <script>
+                                const ctx{{ loop.index }} = document.getElementById('grafico{{ loop.index }}').getContext('2d');
+                                new Chart(ctx{{ loop.index }}, {
+                                    type: 'radar',
+                                    data: {
+                                        labels: {{ aluno.hard_labels|tojson if aluno.hard_labels else aluno.soft_labels|tojson }},
+                                        datasets: [
+                                            {
+                                                label: 'Hard Skills',
+                                                data: {{ aluno.hard_skills|tojson }},
+                                                customLabels: {{ aluno.hard_labels|tojson }},
+                                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                                borderColor: 'rgba(54, 162, 235, 1)',
+                                                pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                                                borderWidth: 2
+                                            },
+                                            {
+                                                label: 'Soft Skills',
+                                                data: {{ aluno.soft_skills|tojson }},
+                                                customLabels: {{ aluno.soft_labels|tojson }},
+                                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                                borderColor: 'rgba(255, 99, 132, 1)',
+                                                pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                                                borderWidth: 2
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        interaction: {
+                                            mode: 'nearest',
+                                            intersect: true
+                                        },
+                                        scales: {
+                                            r: {
+                                                beginAtZero: true,
+                                                min: 0,
+                                                max: 10,
+                                                ticks: {
+                                                    display: false,
+                                                    stepSize: 1,
+                                                    color: '#666',
+                                                    backdropColor: 'rgba(255, 255, 255, 0.8)'
+                                                },
+                                                grid: {
+                                                    color: 'rgba(200, 200, 200, 0.5)'
+                                                },
+                                                angleLines: {
+                                                    color: 'rgba(200, 200, 200, 0.5)'
+                                                },
+                                                pointLabels: {
+                                                    callback: function(label, index) {
+                                                        const hardLabels = {{ aluno.hard_labels|tojson }};
+                                                        const softLabels = {{ aluno.soft_labels|tojson }};
+                                                        const hard = hardLabels[index] ? `🟦 ${hardLabels[index]}` : '';
+                                                        const soft = softLabels[index] ? `🟥 ${softLabels[index]}` : '';
+                                                        // Retorna um array: cada string será uma linha
+                                                        return [hard, soft].filter(Boolean);
+                                                    },
+                                                    font: {
+                                                        size: 8
+                                                    },
+                                                    color: '#000'
+                                                }
+                                            }
+                                        },
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                position: 'top',
+                                                labels: {
+                                                    color: 'black'
+                                                }
+                                            },
+                                            tooltip: {
+                                                enabled: true,
+                                                mode: 'nearest',
+                                                intersect: true,
+                                                callbacks: {
+                                                    title: function() {
+                                                        return ''; // Remove o título do eixo como "Banco de Dados"
+                                                    },
+                                                    label: function(context) {
+                                                        const dataset = context.dataset;
+                                                        const index = context.dataIndex;
+                                                        const customLabel = dataset.customLabels?.[index] || 'Skill';
+                                                        const value = context.formattedValue;
+                                                        const cor = dataset.label === 'Soft Skills' ? '🟥' : '🟦';
+                                                        return `${cor} ${customLabel}: ${value}`;
+                                                    }
+                                                },
+                                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                                titleColor: '#fff',
+                                                bodyColor: '#fff',
+                                                displayColors: false
+                                            }
+                                        }
+                                    }
+                                });
+                            </script>
+                        {% else %}
+                            <p><em>Sem dados de skills disponíveis.</em></p>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-end">
+                        <a href="{{ url_for('instituicao.detalhes_aluno_instituicao', id_aluno=aluno.id_aluno) }}" class="btn btn-primary btn-sm">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center"><em>Nenhum aluno encontrado.</em></p>
+    {% endif %}
+    
+    <!-- Modal de Cadastro -->
+     <!-- Toasts de Notificação -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastNotificacao" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastNotificacaoBody"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+    <div class="modal fade" id="cadastroModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark text-white p-4 rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title">Cadastro de Aluno e Skills</h5>
+                <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="{{ url_for('instituicao.cadastrar_aluno') }}" method="POST">
+                <!-- CSRF: campo hidden para proteção contra Cross-Site Request Forgery -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body">
+                    <h5>Informações do Aluno</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label>Nome Completo</label>
+                            <input name="nome_jovem" class="form-control" placeholder="Nome do aluno" required>
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Data de Nascimento</label>
+                            <input name="data_nascimento" type="date" class="form-control" required>
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Período</label>
+                            <input name="periodo" type="number" class="form-control" placeholder="7" required min="1" max="20">
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Curso</label>
+                            <select name="curso" class="form-select" required>
+                                <option value="" disabled selected>Selecione o curso</option>
+                                {% for curso in cursos_disponiveis %}
+                                    <option value="{{ curso }}">{{ curso }}</option>
+                                {% endfor %}
+                            </select>
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Localização</label>
+                            <input name="endereco_jovem" class="form-control" placeholder="Localização" required>
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Contato</label>
+                            <input name="contato_jovem" class="form-control" placeholder="00000000000" required maxlength="11" inputmode="numeric" pattern="\d{11}" id="contato_jovem">
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label>E-mail</label>
+                            <input name="email" type="email" class="form-control" placeholder="email@exemplo.com" required>
+                        <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Formação</label>
+                            <textarea name="formacao" class="form-control" placeholder="Pós Graduado em Eng. Software." required></textarea>
+                        <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h5>Skills do Aluno</h5>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label><strong>Hard Skills do Curso</strong></label>
+                            <div id="hardSkillsFields" class="row g-3"></div>
+                        </div>
+                        <div class="col-md-12">
+                            <label><strong>Soft Skills</strong></label>
+                        </div>
+                        {% for soft in SOFT_SKILLS %}
+                        <div class="col-md-6">
+                            <label>{{ soft }}</label>
+                            <input name="{{ soft.lower().replace(' ', '_') }}" type="number" class="form-control skill-input" min="0" max="10" step="1" placeholder="Digite de 1 a 10 (Números naturais)" required>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<br>
+
+{% if total_pages > 1 %}
+<nav aria-label="Paginação de alunos">
+  <ul class="pagination justify-content-center mt-4">
+    <li class="page-item {% if page == 1 %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('instituicao.alunos_instituicao', page=page-1) }}{% if filtro_curso %}&curso={{ filtro_curso }}{% endif %}">Anterior</a>
+    </li>
+    {% for p in range(1, total_pages+1) %}
+      <li class="page-item {% if p == page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('instituicao.alunos_instituicao', page=p) }}{% if filtro_curso %}&curso={{ filtro_curso }}{% endif %}">{{ p }}</a>
+      </li>
+    {% endfor %}
+    <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('instituicao.alunos_instituicao', page=page+1) }}{% if filtro_curso %}&curso={{ filtro_curso }}{% endif %}">Próxima</a>
+    </li>
+  </ul>
+</nav>
+<br>
+{% endif %}
+<!-- Toasts de Notificação -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastNotificacao" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastNotificacaoBody">
+        <!-- Mensagem via JS -->
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Script para passar dados do backend para o JavaScript -->
+<script>
+    // Passa os dados das hard skills para o JavaScript
+    window.hardSkillsPorCurso = {{ HARD_SKILLS_POR_CURSO | tojson }};
+</script>
+
+<script src="{{ url_for('static', filename='js/alunos_instituicao.js') }}"></script>
+
+<!-- Script para exibir toasts após carregar base.js -->
+<script>
+    // Aguarda o carregamento completo da página para garantir que base.js foi carregado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aguarda um pouco mais para garantir que base.js foi carregado
+        setTimeout(function() {
+            // Exibe toasts para mensagens flash do Flask
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    console.log("Mensagens flash recebidas:", {{ messages|tojson }});
+                    {% for category, message in messages %}
+                        let corToast = 'success';
+                        if ('{{category}}' === 'error' || '{{category}}' === 'danger') corToast = 'danger';
+                        else if ('{{category}}' === 'warning') corToast = 'warning';
+
+                        // Verifica se showToast está disponível antes de chamar
+                        if (typeof showToast === 'function') {
+                            console.log("Exibindo toast:", {{ message|tojson }}, corToast);
+                            showToast({{ message|tojson }}, corToast, 4000);
+                        } else {
+                            console.error('showToast não está disponível');
+                        }
+                    {% endfor %}
+                {% else %}
+                    console.log("Nenhuma mensagem flash para exibir.");
+                {% endif %}
+            {% endwith %}
+        }, 100);
+        
+        // Teste manual da função showToast (remover após debug)
+        setTimeout(function() {
+            if (typeof showToast === 'function') {
+                console.log("Teste: showToast está disponível");
+                // showToast("Teste de toast", "success", 3000);
+            } else {
+                console.error("Teste: showToast NÃO está disponível");
+            }
+        }, 200);
+    });
+</script>
+
+<!-- Bootstrap Icons CDN para ícones -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

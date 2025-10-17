@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% set hide_navbar = False %}
+
+{% block title %}Perfil - DashTalent{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Toasts de Notificação -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastNotificacao" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastNotificacaoBody"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 position-relative">
+            <a href="{{ url_for('auth.home') }}" class="back-circle position-absolute start-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5a.5.5 0 0 1 .5.5z"/>
+                </svg>
+            </a>
+            <h1 class="m-0 w-100 text-center title-responsive">Meu Perfil</h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('users.perfil') }}" novalidate onsubmit="return validarFormulario()">
+        <!-- CSRF: campo hidden para proteção contra Cross-Site Request Forgery -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if session.get('tipo_usuario') == 'chefe' %}
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario.nome }}" required minlength="3" maxlength="30" pattern="[A-Za-zÀ-ÿ\s]+" title="Apenas letras, mínimo de 3 e máximo de 30 caracteres" oninput="filtrarEntrada(this, 'letras')">
+                <div id="erro-nome" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="cargo" class="form-label">Cargo</label>
+                <select class="form-select" id="cargo" name="cargo" required>
+                    <option value="" disabled {% if not usuario.cargo %}selected{% endif %}>Selecione</option>
+                    <option value="CEO" {% if usuario.cargo == 'CEO' %}selected{% endif %}>CEO</option>
+                    <option value="Gerente" {% if usuario.cargo == 'Gerente' %}selected{% endif %}>Gerente</option>
+                    <option value="Coordenador" {% if usuario.cargo == 'Coordenador' %}selected{% endif %}>Coordenador</option>
+                </select>
+                <div id="erro-cargo" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="nome_empresa" class="form-label">Nome da Empresa</label>
+                <input type="text" class="form-control" id="nome_empresa" name="nome_empresa" value="{{ usuario.nome_empresa }}" required maxlength="30" pattern="[A-Za-zÀ-ÿ\s]+" title="Apenas letras. Máximo de 30 caracteres" oninput="filtrarEntrada(this, 'letras')">
+                <div id="erro-nome_empresa" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required maxlength="50" title="Insira um e-mail válido com até 50 caracteres" onblur="validarEmail(this)">
+                <div id="erro-email" class="invalid-feedback"></div>
+            </div>
+        {% elif session.get('tipo_usuario') == 'instituicao' %}
+            <div class="mb-3">
+                <label for="nome_instituicao" class="form-label">Nome da Instituição</label>
+                <input type="text" class="form-control" id="nome_instituicao" name="nome_instituicao" value="{{ usuario.nome_instituicao }}" required maxlength="30" pattern="[A-Za-zÀ-ÿ\s]+" title="Apenas letras. Máximo de 30 caracteres" oninput="filtrarEntrada(this, 'letras')">
+                <div id="erro-nome_instituicao" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="endereco_instituicao" class="form-label">Endereço</label>
+                <input type="text" class="form-control" id="endereco_instituicao" name="endereco_instituicao" value="{{ usuario.endereco_instituicao }}" required maxlength="80" title="Máximo de 80 caracteres" minlength="5">
+                <div id="erro-endereco_instituicao" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="reitor" class="form-label">Reitor</label>
+                <input type="text" class="form-control" id="reitor" name="reitor" value="{{ usuario.reitor }}" required minlength="3" maxlength="30" pattern="[A-Za-zÀ-ÿ\s]+" title="Apenas letras, mínimo de 3 e máximo de 30 caracteres" oninput="filtrarEntrada(this, 'letras')">
+                <div id="erro-reitor" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="infraestrutura" class="form-label">Infraestrutura</label>
+                <textarea class="form-control" id="infraestrutura" name="infraestrutura" rows="3" required maxlength="150" minlength="20" title="Mínimo de 20 e máximo de 150 caracteres">{{ usuario.infraestrutura }}</textarea>
+                <div id="erro-infraestrutura" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="nota_mec" class="form-label">Nota MEC</label>
+                <select class="form-select" id="nota_mec" name="nota_mec" required>
+                    <option value="" disabled {% if not usuario.nota_mec %}selected{% endif %}>Selecione</option>
+                    {% for n in range(1, 6) %}
+                        <option value="{{ n }}" {% if usuario.nota_mec == n %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                </select>
+                <div id="erro-nota_mec" class="invalid-feedback"></div>
+                <small class="text-muted">Digite um valor entre 1 e 5.</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Cursos da Instituição</label>
+                <ul class="list-group">
+                    {% for curso in cursos_da_instituicao %}
+                        <li class="list-group-item">{{ curso.nome }}</li>
+                    {% else %}
+                        <li class="list-group-item text-muted">Nenhum curso cadastrado.</li>
+                    {% endfor %}
+                </ul>
+                <small class="text-muted">Para adicionar cursos, vá para <a href="{{ url_for('instituicao.cursos') }}">Cursos</a>.</small>
+            </div>
+            <div class="mb-3">
+                <label for="modalidades" class="form-label">Modalidades</label>
+                <select class="form-select" id="modalidades" name="modalidades" required>
+                    <option value="" disabled {% if not usuario.modalidades %}selected{% endif %}>Selecione</option>
+                    <option value="Presencial" {% if usuario.modalidades == 'Presencial' %}selected{% endif %}>Presencial</option>
+                    <option value="Hibrido" {% if usuario.modalidades == 'Hibrido' %}selected{% endif %}>Hibrido</option>
+                    <option value="EAD" {% if usuario.modalidades == 'EAD' %}selected{% endif %}>EAD</option>
+                </select>
+                <div id="erro-modalidades" class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required maxlength="50" title="Insira um e-mail válido com até 50 caracteres" onblur="validarEmail(this)">
+                <div id="erro-email" class="invalid-feedback"></div>
+            </div>
+        {% endif %}
+        <div class="mb-3">
+            <label for="senha" class="form-label">Nova Senha (opcional)</label>
+            <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite uma nova senha (opcional)" maxlength="20" title="Senha entre 8 e 20 caracteres, com pelo menos uma letra, um número e um caractere especial" oninput="validarSenha(this)">
+            <div id="erro-senha" class="invalid-feedback"></div>
+            <small id="forca-senha" class="form-text"></small>
+        </div>
+        <button type="submit" class="btn btn-success">Atualizar</button>
+    </form>
+</div>
+<br>
+<script src="{{ url_for('static', filename='js/perfil.js') }}"></script>
+
+<!-- Toasts de Notificação -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastNotificacao" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastNotificacaoBody"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Script para exibir toasts após carregar base.js -->
+<script>
+    // Aguarda o carregamento completo da página para garantir que base.js foi carregado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aguarda um pouco mais para garantir que base.js foi carregado
+        setTimeout(function() {
+            // Exibe toasts para mensagens flash do Flask
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    console.log("Mensagens flash recebidas:", {{ messages|tojson }});
+                    {% for category, message in messages %}
+                        let corToast = 'success';
+                        if ('{{category}}' === 'error' || '{{category}}' === 'danger') corToast = 'danger';
+                        else if ('{{category}}' === 'warning') corToast = 'warning';
+
+                        // Verifica se showToast está disponível antes de chamar
+                        if (typeof showToast === 'function') {
+                            console.log("Exibindo toast:", {{ message|tojson }}, corToast);
+                            showToast({{ message|tojson }}, corToast, 4000);
+                        } else {
+                            console.error('showToast não está disponível');
+                        }
+                    {% endfor %}
+                {% else %}
+                    console.log("Nenhuma mensagem flash para exibir.");
+                {% endif %}
+            {% endwith %}
+        }, 100);
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% set hide_navbar = False %}
+
+{% block title %}Detalhes da Instituição - {{ instituicao.nome_instituicao }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/detalhes_instituicao.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 position-relative">
+            <a href="{{ url_for('chefe.instituicao_ensino') }}" class="back-circle position-absolute start-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 7.5H14.5a.5.5 0 0 1 .5.5z"/>
+                </svg>
+            </a>
+            <h1 class="m-0 w-100 text-center title-responsive">Detalhes da Instituição</h1>
+    </div>
+
+    <div class="card shadow-sm p-4">
+        <h3 class="text-center">{{ instituicao.nome_instituicao }}</h3>
+        <ul class="list-group list-group-flush mt-3">
+            <li class="list-group-item"><strong>Endereço:</strong> {{ instituicao.endereco_instituicao }}</li>
+            <li class="list-group-item"><strong>E-mail:</strong> {{ instituicao.email }}</li>
+            <li class="list-group-item"><strong>Infraestrutura:</strong> {{ instituicao.infraestrutura }}</li>
+            <li class="list-group-item"><strong>Nota MEC:</strong> {{ instituicao.nota_mec }}</li>
+            <li class="list-group-item"><strong>Modalidades:</strong> {{ instituicao.modalidades }}</li>
+            <li class="list-group-item"><strong>Quantidade de Alunos:</strong> {{ instituicao.quantidade_de_alunos }}</li>
+            <li class="list-group-item"><strong>Reitor:</strong> {{ instituicao.reitor }}</li>
+            <li class="list-group-item">
+                <strong>Cursos Cadastrados:</strong>
+                {% if cursos %}
+                    <ul>
+                        {% for curso in cursos %}
+                            <li>{{ curso.nome }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    Nenhum curso cadastrado.
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</div>
+<br>
+
+<!-- Toasts de Notificação -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastNotificacao" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastNotificacaoBody"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Script para exibir toasts após carregar base.js -->
+<script>
+    // Exibe toasts para mensagens flash do Flask
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                let corToast = 'success';
+                if ('{{category}}' === 'error' || '{{category}}' === 'danger') corToast = 'danger';
+                else if ('{{category}}' === 'warning') corToast = 'warning';
+
+                showToast({{ message|tojson }}, corToast, 4000);
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</script>
+{% endblock %}

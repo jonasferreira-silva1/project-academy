@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% set hide_navbar = False %}
+
+{% block title %}Home - Instituição de Ensino{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="text-center mb-3">Bem-vindo, {{ current_user.nome_instituicao }}!</h1>
+    <p class="text-center mb-5">"Transformando vidas através da educação. Gerencie seus alunos e inspire o futuro."</p>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4 text-center h-100">
+                <h3>Gerenciar Alunos</h3>
+                <p>Visualize, filtre e gerencie os alunos cadastrados na sua instituição.</p>
+                <a href="{{ url_for('instituicao.alunos_instituicao') }}" class="btn btn-primary btn-lg">Gerenciar Alunos</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4 text-center h-100">
+                <h3>Cursos</h3>
+                <p>Gerencie os cursos oferecidos pela sua instituição.</p>
+                <a href="{{ url_for('instituicao.cursos') }}" class="btn btn-success btn-lg">Ver Cursos</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-lg p-4 text-center h-100">
+                <h3>Alunos indicados</h3>
+                <p>Observe seus alunos que ganharam indicação!</p>
+                <a href="{{ url_for('instituicao.alunos_indicados') }}" class="btn btn-success btn-lg">Alunos indicados</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toasts de Notificação -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastNotificacao" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastNotificacaoBody"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Script para exibir toasts após carregar base.js -->
+<script>
+    // Exibe toasts para mensagens flash do Flask
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                let corToast = 'success';
+                if ('{{category}}' === 'error' || '{{category}}' === 'danger') corToast = 'danger';
+                else if ('{{category}}' === 'warning') corToast = 'warning';
+
+                showToast({{ message|tojson }}, corToast, 4000);
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</script>
+{% endblock %}

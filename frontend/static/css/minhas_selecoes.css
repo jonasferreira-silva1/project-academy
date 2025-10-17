@@ -1,0 +1,74 @@
+/* ==== Estilo do botão de voltar ==== */
+.back-circle {
+    width: 40px;
+    height: 40px;
+    background-color: #1b3b4d;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    margin-left: 0.5rem;
+    z-index: 1;
+    transition: background-color 0.3s;
+}
+
+.back-circle svg {
+    color: white;
+}
+
+.back-circle:hover {
+    background-color: #154256;
+}
+
+/* ==== Estilo do título para evitar sobreposição ==== */
+.page-title {
+    margin: 0;
+    width: 100%;
+    text-align: center;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+ h5,
+ p {
+    margin-bottom: 0px; /* ou 2px se quiser ainda mais junto */
+}
+
+/* ======= CARDS ======= */
+.card {
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease;
+    min-height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* ==== Responsividade ==== */
+/* Tablets (<= 768px) */
+@media (max-width: 768px) {
+    .back-circle {
+        width: 35px;
+        height: 35px;
+    }
+
+    .page-title {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+/* Smartphones (<= 576px) */
+@media (max-width: 576px) {
+    .back-circle {
+        width: 30px;
+        height: 30px;
+    }
+
+    .page-title {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
