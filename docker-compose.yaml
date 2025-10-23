@@ -16,17 +16,17 @@ services:
       - db
     command: ["/wait-for-db.sh", "db", "python", "app.py"]
     env_file:
-      - ./backend/env_example.txt
+      - .env
 
   db:
     image: mysql:5.7
     env_file:
-      - ./backend/env_example.txt
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: "jonas1385"
-      MYSQL_DATABASE: "educ_invest"
-      MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_unicode_ci
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_CHARSET: ${MYSQL_CHARSET}
+      MYSQL_COLLATION: ${MYSQL_COLLATION}
     ports:
       - "3307:3306"
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci

@@ -58,10 +58,11 @@ def load_user_wrapper(user_id):
 register_blueprints(app)
 
 
-# Configuração CSRF e cookies (ajustar secure=True em produção)
+# Configuração CSRF e cookies (controlado por variável de ambiente para segurança)
+use_https = os.getenv('USE_HTTPS', 'False').lower() == 'true'
 app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=False  # True em produção
+    SESSION_COOKIE_SECURE=use_https  # Controlado por USE_HTTPS
 )
 
 
@@ -79,7 +80,7 @@ def set_csrf_cookie(response):
         response.set_cookie(
             "csrf_token",
             csrf_token_value,
-            secure=False,  # True em produção
+            secure=use_https,  # Controlado por USE_HTTPS
             samesite="Lax",
             path="/"
         )
@@ -90,4 +91,6 @@ def set_csrf_cookie(response):
 
 if __name__ == "__main__":
     # Host para acesso externo
-    app.run(debug=True, host='0.0.0.0')
+    # Debug mode controlado por variável de ambiente para segurança
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0')
