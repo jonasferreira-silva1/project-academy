@@ -13,10 +13,10 @@ rate_limit_attempts = {}
 usuarios_bloqueados = set()
 
 # Configurações do rate limiting
-MAX_LOGIN_ATTEMPTS = 3  # Máximo de tentativas permitidas por fase
-# Duração do bloqueio temporário em segundos (5 minutos)
-BLOCK_DURATION = 300
-WARNING_THRESHOLD = 3   # Aviso na 3ª tentativa (última antes do bloqueio)
+MAX_LOGIN_ATTEMPTS = 5  # Máximo de tentativas permitidas (requisito: 5 falhas)
+# Duração do bloqueio temporário em segundos (10 minutos - requisito do projeto)
+BLOCK_DURATION = 600
+WARNING_THRESHOLD = 4   # Aviso na 4ª tentativa (última antes do bloqueio)
 
 
 def verificar_rate_limit(email):
@@ -48,7 +48,7 @@ def verificar_rate_limit(email):
     dados_email['count'] += 1
     dados_email['last_attempt'] = agora
 
-    # Verifica se excedeu o limite (4ª tentativa = bloqueio)
+    # Verifica se excedeu o limite (6ª tentativa = bloqueio, após 5 permitidas)
     if dados_email['count'] > MAX_LOGIN_ATTEMPTS:
         if dados_email['fase'] == 1:
             # FASE 1: Bloqueio temporário

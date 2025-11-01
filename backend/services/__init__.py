@@ -26,7 +26,7 @@ from .validation_service import (
     validar_senha_formato, validar_nota_mec_formato, validar_modalidade_formato
 )
 from .password_validation_service import (
-    validar_senha_minima, validar_confirmacao_senha,
+    validar_senha_minima, validar_senha_forte, validar_confirmacao_senha,
     validar_campos_obrigatorios_instituicao, validar_campos_obrigatorios_chefe,
     validar_campos_obrigatorios_aluno, validar_campos_obrigatorios_aluno_edicao
 )
@@ -90,7 +90,7 @@ __all__ = [
     'validar_skill_valor', 'validar_nome_formato', 'validar_cargo_formato',
     'validar_senha_formato', 'validar_nota_mec_formato', 'validar_modalidade_formato',
     # Password Validation Service
-    'validar_senha_minima', 'validar_confirmacao_senha',
+    'validar_senha_minima', 'validar_senha_forte', 'validar_confirmacao_senha',
     'validar_campos_obrigatorios_instituicao', 'validar_campos_obrigatorios_chefe',
     'validar_campos_obrigatorios_aluno', 'validar_campos_obrigatorios_aluno_edicao',
     # Skills Service

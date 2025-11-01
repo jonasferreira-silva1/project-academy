@@ -222,3 +222,4 @@ class TestValidationService:
         for modalidade in modalidades_invalidas:
             assert validar_modalidade_formato(
                 modalidade), f"Modalidade {modalidade} deveria ser inválida"
+

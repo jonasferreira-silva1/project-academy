@@ -1,15 +1,53 @@
 """
 Serviço de Validação de Senha - Funções de validação de senha movidas do app.py.
 Código movido para organizar responsabilidades, mantendo a lógica original.
+Atualizado para atender requisitos de segurança: mínimo de 10 caracteres e validação forte.
 """
+
+import re
 
 
 def validar_senha_minima(senha):
     """
-    Valida senha mínima - código movido do app.py.
-    Mantém a lógica original: if not senha or len(senha) < 8
+    Valida senha mínima conforme política de segurança.
+    Requisito: Mínimo de 10 caracteres.
+    
+    Retorna: True se inválida (senha vazia ou < 10 caracteres), False se válida
     """
-    return not senha or len(senha) < 8
+    return not senha or len(senha) < 10
+
+
+def validar_senha_forte(senha):
+    """
+    Valida se a senha atende à política de segurança completa:
+    - Mínimo de 10 caracteres
+    - Pelo menos 1 letra maiúscula
+    - Pelo menos 1 letra minúscula
+    - Pelo menos 1 número
+    - Pelo menos 1 caractere especial
+    
+    Retorna: (valida: bool, mensagem_erro: str ou None)
+    """
+    if not senha:
+        return False, "Senha é obrigatória."
+    
+    if len(senha) < 10:
+        return False, "A senha deve ter no mínimo 10 caracteres."
+    
+    if not re.search(r'[A-Z]', senha):
+        return False, "A senha deve conter pelo menos uma letra maiúscula."
+    
+    if not re.search(r'[a-z]', senha):
+        return False, "A senha deve conter pelo menos uma letra minúscula."
+    
+    if not re.search(r'\d', senha):
+        return False, "A senha deve conter pelo menos um número."
+    
+    # Caracteres especiais comuns: !@#$%^&*(),.?":{}|<>
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', senha):
+        return False, "A senha deve conter pelo menos um caractere especial (!@#$%^&*(),.?\":{}|<>)."
+    
+    return True, None
 
 
 def validar_confirmacao_senha(senha, confirmar_senha):

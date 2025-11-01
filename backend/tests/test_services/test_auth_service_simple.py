@@ -94,3 +94,4 @@ class TestAuthServiceSimple:
 
                 usuario = load_user(1)
                 assert usuario is None
+

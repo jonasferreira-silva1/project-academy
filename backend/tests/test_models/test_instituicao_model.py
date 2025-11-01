@@ -238,3 +238,4 @@ class TestInstituicaodeEnsinoModel:
             ).first()
             assert instituicao_criada is not None
             assert instituicao_criada.nota_mec == 4.5
+

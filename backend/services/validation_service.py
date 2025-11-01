@@ -56,10 +56,12 @@ def validar_cargo_formato(cargo):
 
 def validar_senha_formato(senha):
     """
-    Valida formato de senha - código movido do app.py.
-    Mantém a lógica original: if len(senha_nova) < 8
+    Valida formato de senha conforme política de segurança.
+    Requisito: Mínimo de 10 caracteres.
+    
+    Retorna: True se inválida (< 10 caracteres), False se válida
     """
-    return len(senha) < 8
+    return len(senha) < 10
 
 
 def validar_nota_mec_formato(nota_mec):

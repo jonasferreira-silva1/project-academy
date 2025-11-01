@@ -11,7 +11,7 @@ from domain import Chefe, InstituicaodeEnsino, TwoFactor, CURSOS_PADRAO
 from .rate_limit_service import verificar_rate_limit, resetar_rate_limit
 from .audit_log_service import registrar_log
 from .password_validation_service import (
-    validar_senha_minima, validar_confirmacao_senha,
+    validar_senha_minima, validar_senha_forte, validar_confirmacao_senha,
     validar_campos_obrigatorios_instituicao, validar_campos_obrigatorios_chefe
 )
 from .user_service import (
@@ -77,9 +77,10 @@ def processar_cadastro():
         senha = request.form.get('senha')
         confirmar_senha = request.form.get('confirmar_senha')
 
-        # Validação: senha mínima de 8 caracteres
-        if validar_senha_minima(senha):
-            flash('A senha deve ter no mínimo 8 caracteres.', 'danger')
+        # Validação: senha forte (mínimo 10 caracteres, maiúscula, minúscula, número, especial)
+        valida, mensagem_erro = validar_senha_forte(senha)
+        if not valida:
+            flash(mensagem_erro, 'danger')
             return redirect(url_for('auth.cadastro'))
 
         if validar_confirmacao_senha(senha, confirmar_senha):
@@ -269,9 +270,11 @@ def processar_perfil():
 
             # Validação da senha se fornecida
             senha_nova = request.form.get('senha', '')
-            if senha_nova and validar_senha_minima(senha_nova):
-                flash("A senha deve ter no mínimo 8 caracteres.", "danger")
-                return redirect(url_for('users.perfil'))
+            if senha_nova:
+                valida, mensagem_erro = validar_senha_forte(senha_nova)
+                if not valida:
+                    flash(mensagem_erro, "danger")
+                    return redirect(url_for('users.perfil'))
 
             # Preparar dados do formulário
             dados_formulario = {
@@ -299,9 +302,11 @@ def processar_perfil():
 
             # Validação da senha se fornecida
             senha_nova = request.form.get('senha', '')
-            if senha_nova and validar_senha_minima(senha_nova):
-                flash("A senha deve ter no mínimo 8 caracteres.", "danger")
-                return redirect(url_for('users.perfil'))
+            if senha_nova:
+                valida, mensagem_erro = validar_senha_forte(senha_nova)
+                if not valida:
+                    flash(mensagem_erro, "danger")
+                    return redirect(url_for('users.perfil'))
 
             # Preparar dados do formulário
             dados_formulario = {

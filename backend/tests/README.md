@@ -231,3 +231,4 @@ Ao adicionar novos testes:
 3. Teste casos de sucesso e falha
 4. Mantenha os testes independentes
 5. Documente o que cada teste verifica
+

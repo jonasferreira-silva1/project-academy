@@ -12,6 +12,7 @@ from flask import session, flash, redirect, url_for, request, render_template
 from domain import db, Chefe, InstituicaodeEnsino, ResetarSenha
 from .email_service import enviar_email
 from .rate_limit_service import desbloquear_usuario
+from .password_validation_service import validar_senha_forte, validar_confirmacao_senha
 
 
 def verificar_email_existe(email):
@@ -191,16 +192,19 @@ def validar_token_reset(reset_token):
 
 def validar_nova_senha(nova_senha, confirmar_senha):
     """
-    Valida a nova senha
+    Valida a nova senha conforme política de segurança completa.
     Retorna: (valida, mensagem)
     """
     if not nova_senha or not confirmar_senha:
         return False, "Todos os campos são obrigatórios."
 
-    if len(nova_senha) < 6:
-        return False, "A senha deve ter pelo menos 6 caracteres."
+    # Validação de senha forte (10 caracteres, maiúscula, minúscula, número, especial)
+    valida, mensagem_erro = validar_senha_forte(nova_senha)
+    if not valida:
+        return False, mensagem_erro
 
-    if nova_senha != confirmar_senha:
+    # Validação de confirmação de senha
+    if validar_confirmacao_senha(nova_senha, confirmar_senha):
         return False, "As senhas não coincidem."
 
     return True, None
