@@ -216,14 +216,33 @@ def atualizar_senha_usuario(reset_request, nova_senha):
     Retorna: (sucesso, mensagem)
     """
     try:
-        senha_hash = generate_password_hash(nova_senha)
+        # Verificar se a nova senha está no histórico
+        from .password_history_service import verificar_senha_no_historico, salvar_senha_no_historico
+        esta_no_historico, mensagem_erro = verificar_senha_no_historico(
+            reset_request.user_type,
+            reset_request.user_id,
+            nova_senha
+        )
+        if esta_no_historico:
+            return False, mensagem_erro
 
+        # Obter usuário para salvar senha atual no histórico
         if reset_request.user_type == 'chefe':
             user = Chefe.query.get(reset_request.user_id)
-            user.senha = senha_hash
         else:
             user = InstituicaodeEnsino.query.get(reset_request.user_id)
-            user.senha = senha_hash
+
+        if not user:
+            return False, "Usuário não encontrado."
+
+        # Salvar senha atual no histórico antes de atualizar
+        senha_atual_hash = user.senha
+        salvar_senha_no_historico(
+            reset_request.user_type, reset_request.user_id, senha_atual_hash)
+
+        # Gerar hash da nova senha e atualizar
+        senha_hash = generate_password_hash(nova_senha)
+        user.senha = senha_hash
 
         # Marcar código como usado
         reset_request.used = True
@@ -235,8 +254,9 @@ def atualizar_senha_usuario(reset_request, nova_senha):
 
         return True, "Senha alterada com sucesso! Faça login com sua nova senha."
 
-    except Exception:
+    except Exception as e:
         db.session.rollback()
+        print(f"ERRO ao atualizar senha: {e}")
         return False, "Erro ao alterar senha. Tente novamente."
 
 
@@ -319,10 +339,10 @@ def processar_verificar_codigo_post():
     if sucesso:
         session['reset_token'] = reset_request.id
         flash(mensagem, "success")
-        return redirect(url_for(redirect_url, email=email)) 
+        return redirect(url_for(redirect_url, email=email))
     else:
         if redirect_url:
-            return redirect(url_for(redirect_url, email=email)) 
+            return redirect(url_for(redirect_url, email=email))
         else:
             flash(mensagem, "danger")
             return redirect(url_for('esquece.verificar_codigo', email=email))

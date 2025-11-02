@@ -45,9 +45,15 @@ def criar_instituicao_ensino(dados_formulario):
             db.session.add(curso)
         db.session.commit()
 
+        # Salvar senha inicial no histórico
+        from .password_history_service import salvar_senha_texto_plano_no_historico
+        salvar_senha_texto_plano_no_historico(
+            'instituicao', nova_instituicao.id_instituicao, dados_formulario['senha'])
+
         # Registrar log de cadastro em arquivo
         from .file_log_service import registrar_log_cadastro_usuario
-        registrar_log_cadastro_usuario(nova_instituicao.nome_instituicao, 'instituicao')
+        registrar_log_cadastro_usuario(
+            nova_instituicao.nome_instituicao, 'instituicao')
 
         return True, 'Cadastro de Instituição realizado com sucesso! Faça login agora.', nova_instituicao
 
@@ -76,6 +82,11 @@ def criar_chefe(dados_formulario):
         )
         db.session.add(novo_chefe)
         db.session.commit()
+
+        # Salvar senha inicial no histórico
+        from .password_history_service import salvar_senha_texto_plano_no_historico
+        salvar_senha_texto_plano_no_historico(
+            'chefe', novo_chefe.id_chefe, dados_formulario['senha'])
 
         # Registrar log de cadastro em arquivo
         from .file_log_service import registrar_log_cadastro_usuario
@@ -126,7 +137,7 @@ def atualizar_perfil_chefe(chefe, dados_formulario):
         )
         senha_nova = dados_formulario.get('senha', '')
         senha_alterada = bool(senha_nova)
-        
+
         # Atualizar dados
         chefe.nome = nome
         chefe.cargo = cargo
@@ -135,10 +146,23 @@ def atualizar_perfil_chefe(chefe, dados_formulario):
 
         # Atualizar senha se fornecida
         if senha_nova:
+            # Verificar se a nova senha está no histórico
+            from .password_history_service import verificar_senha_no_historico, salvar_senha_no_historico
+            esta_no_historico, mensagem_erro = verificar_senha_no_historico(
+                'chefe', chefe.id_chefe, senha_nova)
+            if esta_no_historico:
+                return False, mensagem_erro
+
+            # Salvar senha atual no histórico antes de atualizar
+            senha_atual_hash = chefe.senha
+            salvar_senha_no_historico(
+                'chefe', chefe.id_chefe, senha_atual_hash)
+
+            # Atualizar para nova senha
             chefe.senha = generate_password_hash(senha_nova)
 
         db.session.commit()
-        
+
         # Registrar log de alteração em arquivo
         if dados_alterados or senha_alterada:
             from .file_log_service import registrar_log_alteracao_usuario
@@ -149,7 +173,7 @@ def atualizar_perfil_chefe(chefe, dados_formulario):
                 tipo_alteracao.append('dados')
             alteracao_str = ' e '.join(tipo_alteracao)
             registrar_log_alteracao_usuario(chefe.nome, alteracao_str)
-        
+
         return True, "Perfil atualizado com sucesso!"
 
     except IntegrityError:
@@ -206,7 +230,7 @@ def atualizar_perfil_instituicao(instituicao, dados_formulario):
         )
         senha_nova = dados_formulario.get('senha', '')
         senha_alterada = bool(senha_nova)
-        
+
         # Atualizar dados
         instituicao.nome_instituicao = nome_instituicao
         instituicao.endereco_instituicao = dados_formulario['endereco_instituicao']
@@ -218,10 +242,23 @@ def atualizar_perfil_instituicao(instituicao, dados_formulario):
 
         # Atualizar senha se fornecida
         if senha_nova:
+            # Verificar se a nova senha está no histórico
+            from .password_history_service import verificar_senha_no_historico, salvar_senha_no_historico
+            esta_no_historico, mensagem_erro = verificar_senha_no_historico(
+                'instituicao', instituicao.id_instituicao, senha_nova)
+            if esta_no_historico:
+                return False, mensagem_erro
+
+            # Salvar senha atual no histórico antes de atualizar
+            senha_atual_hash = instituicao.senha
+            salvar_senha_no_historico(
+                'instituicao', instituicao.id_instituicao, senha_atual_hash)
+
+            # Atualizar para nova senha
             instituicao.senha = generate_password_hash(senha_nova)
 
         db.session.commit()
-        
+
         # Registrar log de alteração em arquivo
         if dados_alterados or senha_alterada:
             from .file_log_service import registrar_log_alteracao_usuario
@@ -231,8 +268,9 @@ def atualizar_perfil_instituicao(instituicao, dados_formulario):
             if dados_alterados:
                 tipo_alteracao.append('dados')
             alteracao_str = ' e '.join(tipo_alteracao)
-            registrar_log_alteracao_usuario(instituicao.nome_instituicao, alteracao_str)
-        
+            registrar_log_alteracao_usuario(
+                instituicao.nome_instituicao, alteracao_str)
+
         return True, "Perfil atualizado com sucesso!"
 
     except IntegrityError:

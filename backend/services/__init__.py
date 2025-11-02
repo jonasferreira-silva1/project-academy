@@ -39,6 +39,12 @@ from .password_validation_service import (
     validar_campos_obrigatorios_instituicao, validar_campos_obrigatorios_chefe,
     validar_campos_obrigatorios_aluno, validar_campos_obrigatorios_aluno_edicao
 )
+from .password_history_service import (
+    verificar_senha_no_historico,
+    salvar_senha_no_historico,
+    salvar_senha_texto_plano_no_historico,
+    obter_historico_completo
+)
 from .skills_service import (
     validar_skills_por_curso
 )
@@ -110,6 +116,9 @@ __all__ = [
     'validar_senha_minima', 'validar_senha_forte', 'validar_confirmacao_senha',
     'validar_campos_obrigatorios_instituicao', 'validar_campos_obrigatorios_chefe',
     'validar_campos_obrigatorios_aluno', 'validar_campos_obrigatorios_aluno_edicao',
+    # Password History Service
+    'verificar_senha_no_historico', 'salvar_senha_no_historico',
+    'salvar_senha_texto_plano_no_historico', 'obter_historico_completo',
     # Skills Service
     'validar_skills_por_curso',
     # Auth Service

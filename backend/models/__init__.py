@@ -6,10 +6,11 @@ from .chefes import Chefe
 from .cursos import Curso
 from .instituicao import InstituicaodeEnsino
 from .logs import LogAcesso
+from .password_history import PasswordHistory
 from .skills import SkillsDoAluno, SkillsHistorico
 
 __all__ = [
     'Acompanhamento', 'Aluno', 'Chefe', 'Curso', 'db',
     'Indicacao', 'InstituicaodeEnsino', 'LogAcesso',
-    'ResetarSenha', 'SkillsDoAluno', 'SkillsHistorico', 'TwoFactor'
+    'PasswordHistory', 'ResetarSenha', 'SkillsDoAluno', 'SkillsHistorico', 'TwoFactor'
 ]
