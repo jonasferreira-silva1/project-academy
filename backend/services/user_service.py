@@ -45,6 +45,10 @@ def criar_instituicao_ensino(dados_formulario):
             db.session.add(curso)
         db.session.commit()
 
+        # Registrar log de cadastro em arquivo
+        from .file_log_service import registrar_log_cadastro_usuario
+        registrar_log_cadastro_usuario(nova_instituicao.nome_instituicao, 'instituicao')
+
         return True, 'Cadastro de Instituição realizado com sucesso! Faça login agora.', nova_instituicao
 
     except IntegrityError:
@@ -72,6 +76,10 @@ def criar_chefe(dados_formulario):
         )
         db.session.add(novo_chefe)
         db.session.commit()
+
+        # Registrar log de cadastro em arquivo
+        from .file_log_service import registrar_log_cadastro_usuario
+        registrar_log_cadastro_usuario(novo_chefe.nome, 'chefe')
 
         return True, 'Cadastro de Chefe realizado com sucesso! Faça login agora.', novo_chefe
 
@@ -109,6 +117,16 @@ def atualizar_perfil_chefe(chefe, dados_formulario):
         if cargo not in ['CEO', 'Gerente', 'Coordenador']:
             return False, "Selecione um cargo válido."
 
+        # Verificar alterações ANTES de atualizar (para detectar mudanças)
+        dados_alterados = (
+            chefe.nome != nome or
+            chefe.email != novo_email or
+            chefe.cargo != cargo or
+            chefe.nome_empresa != dados_formulario.get('nome_empresa', '')
+        )
+        senha_nova = dados_formulario.get('senha', '')
+        senha_alterada = bool(senha_nova)
+        
         # Atualizar dados
         chefe.nome = nome
         chefe.cargo = cargo
@@ -116,11 +134,22 @@ def atualizar_perfil_chefe(chefe, dados_formulario):
         chefe.email = novo_email
 
         # Atualizar senha se fornecida
-        senha_nova = dados_formulario.get('senha', '')
         if senha_nova:
             chefe.senha = generate_password_hash(senha_nova)
 
         db.session.commit()
+        
+        # Registrar log de alteração em arquivo
+        if dados_alterados or senha_alterada:
+            from .file_log_service import registrar_log_alteracao_usuario
+            tipo_alteracao = []
+            if senha_alterada:
+                tipo_alteracao.append('senha')
+            if dados_alterados:
+                tipo_alteracao.append('dados')
+            alteracao_str = ' e '.join(tipo_alteracao)
+            registrar_log_alteracao_usuario(chefe.nome, alteracao_str)
+        
         return True, "Perfil atualizado com sucesso!"
 
     except IntegrityError:
@@ -168,6 +197,16 @@ def atualizar_perfil_instituicao(instituicao, dados_formulario):
         if modalidades not in ['Presencial', 'Hibrido', 'EAD']:
             return False, "Selecione uma modalidade válida."
 
+        # Verificar alterações ANTES de atualizar (para detectar mudanças)
+        dados_alterados = (
+            instituicao.nome_instituicao != nome_instituicao or
+            instituicao.email != novo_email or
+            instituicao.reitor != reitor or
+            instituicao.endereco_instituicao != dados_formulario['endereco_instituicao']
+        )
+        senha_nova = dados_formulario.get('senha', '')
+        senha_alterada = bool(senha_nova)
+        
         # Atualizar dados
         instituicao.nome_instituicao = nome_instituicao
         instituicao.endereco_instituicao = dados_formulario['endereco_instituicao']
@@ -178,11 +217,22 @@ def atualizar_perfil_instituicao(instituicao, dados_formulario):
         instituicao.email = novo_email
 
         # Atualizar senha se fornecida
-        senha_nova = dados_formulario.get('senha', '')
         if senha_nova:
             instituicao.senha = generate_password_hash(senha_nova)
 
         db.session.commit()
+        
+        # Registrar log de alteração em arquivo
+        if dados_alterados or senha_alterada:
+            from .file_log_service import registrar_log_alteracao_usuario
+            tipo_alteracao = []
+            if senha_alterada:
+                tipo_alteracao.append('senha')
+            if dados_alterados:
+                tipo_alteracao.append('dados')
+            alteracao_str = ' e '.join(tipo_alteracao)
+            registrar_log_alteracao_usuario(instituicao.nome_instituicao, alteracao_str)
+        
         return True, "Perfil atualizado com sucesso!"
 
     except IntegrityError:

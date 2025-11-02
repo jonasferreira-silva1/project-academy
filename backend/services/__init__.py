@@ -17,6 +17,15 @@ from .two_factor_service import (
 from .audit_log_service import (
     registrar_log
 )
+from .file_log_service import (
+    registrar_log_seguranca,
+    registrar_log_cadastro_usuario,
+    registrar_log_alteracao_usuario,
+    registrar_log_exclusao_usuario,
+    registrar_log_erro_autenticacao,
+    registrar_log_5_falhas_consecutivas,
+    registrar_log_evento_aplicacao
+)
 from .pagination_service import (
     paginate_items, get_pagination_data
 )
@@ -83,6 +92,14 @@ __all__ = [
     'processar_two_factor_setup', 'processar_two_factor_verify', 'processar_two_factor_disable',
     # Audit Log Service
     'registrar_log',
+    # File Log Service
+    'registrar_log_seguranca',
+    'registrar_log_cadastro_usuario',
+    'registrar_log_alteracao_usuario',
+    'registrar_log_exclusao_usuario',
+    'registrar_log_erro_autenticacao',
+    'registrar_log_5_falhas_consecutivas',
+    'registrar_log_evento_aplicacao',
     # Pagination Service
     'paginate_items', 'get_pagination_data',
     # Validation Service

@@ -50,6 +50,10 @@ def verificar_rate_limit(email):
 
     # Verifica se excedeu o limite (6ª tentativa = bloqueio, após 5 permitidas)
     if dados_email['count'] > MAX_LOGIN_ATTEMPTS:
+        # Registrar log de 5 falhas consecutivas em arquivo
+        from .file_log_service import registrar_log_5_falhas_consecutivas
+        registrar_log_5_falhas_consecutivas(email)
+        
         if dados_email['fase'] == 1:
             # FASE 1: Bloqueio temporário
             dados_email['blocked_until'] = agora + BLOCK_DURATION

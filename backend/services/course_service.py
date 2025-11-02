@@ -37,6 +37,18 @@ def cadastrar_curso(nome_curso, id_instituicao):
         )
         db.session.add(novo_curso)
         db.session.commit()
+        
+        # Registrar log de evento da aplicação
+        from domain import InstituicaodeEnsino
+        from .file_log_service import registrar_log_evento_aplicacao
+        instituicao = InstituicaodeEnsino.query.get(id_instituicao)
+        if instituicao:
+            registrar_log_evento_aplicacao(
+                'inclusao_curso',
+                instituicao.nome_instituicao,
+                f"Inclusão de novo curso '{nome_curso.strip()}' na instituição"
+            )
+        
         return True, "Curso cadastrado com sucesso!"
     except Exception as e:
         db.session.rollback()

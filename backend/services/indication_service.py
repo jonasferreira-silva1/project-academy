@@ -30,6 +30,19 @@ def indicar_aluno(id_aluno, chefe_id):
         nova_indicacao = Indicacao(id_chefe=chefe_id, id_aluno=id_aluno)
         db.session.add(nova_indicacao)
         db.session.commit()
+        
+        # Registrar log de evento da aplicação
+        from .file_log_service import registrar_log_evento_aplicacao
+        from domain import Chefe
+        chefe = Chefe.query.get(chefe_id)
+        aluno_obj = Aluno.query.get(id_aluno)
+        if chefe and aluno_obj:
+            registrar_log_evento_aplicacao(
+                'indicacao_aluno',
+                chefe.nome,
+                f"Indicação do aluno '{aluno_obj.nome_jovem}' (ID: {id_aluno}) pelo chefe"
+            )
+        
         return True, "Aluno indicado com sucesso!", 200
     except Exception as e:
         db.session.rollback()

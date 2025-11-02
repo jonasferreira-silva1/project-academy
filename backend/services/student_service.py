@@ -116,6 +116,15 @@ def cadastrar_aluno(dados_formulario, id_instituicao):
         instituicao.quantidade_de_alunos += 1
         db.session.commit()
 
+        # Registrar log de evento da aplicação
+        from .file_log_service import registrar_log_evento_aplicacao
+        if instituicao:
+            registrar_log_evento_aplicacao(
+                'cadastro_aluno',
+                instituicao.nome_instituicao,
+                f"Cadastro de novo aluno '{nome_jovem}' no curso '{curso}'"
+            )
+
         return True, "Aluno cadastrado com sucesso!"
     except IntegrityError:
         db.session.rollback()
@@ -137,11 +146,21 @@ def remover_aluno(id_aluno):
 
         # Decrementar a quantidade de alunos na instituição
         instituicao = InstituicaodeEnsino.query.get(aluno.id_instituicao)
+        nome_aluno = aluno.nome_jovem
         instituicao.quantidade_de_alunos -= 1
 
         # Remover o aluno
         db.session.delete(aluno)
         db.session.commit()
+
+        # Registrar log de evento da aplicação
+        from .file_log_service import registrar_log_evento_aplicacao
+        if instituicao:
+            registrar_log_evento_aplicacao(
+                'exclusao_aluno',
+                instituicao.nome_instituicao,
+                f"Exclusão de aluno '{nome_aluno}' (ID: {id_aluno})"
+            )
 
         return True, "Aluno removido com sucesso!"
     except Exception:
@@ -229,6 +248,9 @@ def atualizar_aluno(id_aluno, dados_formulario, cursos_disponiveis):
     if validar_periodo_formato(periodo):
         return False, "Período deve ser um número inteiro entre 1 e 20."
 
+    # Verificar se houve alteração de endereço (um dos eventos solicitados)
+    endereco_alterado = aluno.endereco_jovem != endereco_jovem
+    
     # Atualizar informações do aluno
     aluno.nome_jovem = nome_jovem
     aluno.data_nascimento = data_nascimento
@@ -278,6 +300,25 @@ def atualizar_aluno(id_aluno, dados_formulario, cursos_disponiveis):
         # Salvar histórico das skills após atualizar
         salvar_historico_skills_atualizacao(
             aluno.id_aluno, new_hard_dict, new_soft_dict)
+
+        # Registrar log de evento da aplicação
+        from .file_log_service import registrar_log_evento_aplicacao
+        instituicao = InstituicaodeEnsino.query.get(aluno.id_instituicao)
+        if instituicao:
+            # Log de alteração de skills
+            registrar_log_evento_aplicacao(
+                'alteracao_skills_aluno',
+                instituicao.nome_instituicao,
+                f"Alteração de skills do aluno '{aluno.nome_jovem}' (ID: {aluno.id_aluno})"
+            )
+            
+            # Log de alteração de endereço (se houver)
+            if endereco_alterado:
+                registrar_log_evento_aplicacao(
+                    'alteracao_endereco_aluno',
+                    instituicao.nome_instituicao,
+                    f"Alteração de endereço de entrega do aluno '{aluno.nome_jovem}' (ID: {aluno.id_aluno})"
+                )
 
         return True, "Informações do aluno atualizadas com sucesso!"
     except IntegrityError:

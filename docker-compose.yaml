@@ -9,6 +9,7 @@ services:
       - ./backend/app.py:/app/app.py
       - ./frontend/static:/app/static
       - ./frontend/templates:/app/templates
+      - ./backend/logs:/app/logs
     restart: always
     networks:
       - dockercompose

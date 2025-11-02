@@ -244,8 +244,12 @@ def processar_login():
                 return redirect(url_for('auth.home'))
 
         # =============================================================================
-        # LOGIN FALHADO - EXIBE MENSAGEM
+        # LOGIN FALHADO - EXIBE MENSAGEM E REGISTRA LOG
         # =============================================================================
+        # Registrar log de erro de autenticação em arquivo
+        from .file_log_service import registrar_log_erro_autenticacao
+        registrar_log_erro_autenticacao(email)
+        
         # Rate limiting já foi verificado antes das credenciais
         if mensagem_rate_limit:
             flash(
